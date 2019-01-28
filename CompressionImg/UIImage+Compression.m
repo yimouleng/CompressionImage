@@ -9,20 +9,29 @@
 #import "UIImage+Compression.h"
 
 static CGFloat const BOUNDARY = 1334;  //图片限定长度值
-static CGFloat  MAXQUALITY = 0.8;  //初始最高压缩质量系数
-static CGFloat  MINQUALITY = 0.5;  //初始最低压缩质量系数
-static CGFloat  SIZE = 200; //图片限定大小，单位KB
+static CGFloat const MAXQUALITY = 0.8;  //初始最高压缩质量系数
+static CGFloat const MINQUALITY = 0.3;  //初始最低压缩质量系数
+static CGFloat const SIZE = 300; //图片限定大小，单位KB
 
 @implementation UIImage (Compression)
 
 
-
+//返回 压缩后图片
 - (UIImage *)compressToImage {
+    NSData *imageData = UIImageJPEGRepresentation(self, 1);
+    NSLog(@"压缩前 ==%f kb",imageData.length/1024.0);
     CGSize size = [self imageSize];
     UIImage *reImage = [self toSourceImageWithSize:size];
     NSData * data = [self cycleCompressImage:reImage];
     UIImage * compressImg = [UIImage imageWithData:data];
     return compressImg;
+}
+//返回 压缩后大小
+- (NSData *)returnCompressSize{
+    CGSize size = [self imageSize];
+    UIImage *reImage = [self toSourceImageWithSize:size];
+    NSData * data = [self cycleCompressImage:reImage];
+    return data;
 }
 
 /**
@@ -32,18 +41,25 @@ static CGFloat  SIZE = 200; //图片限定大小，单位KB
  */
 - (NSData *)cycleCompressImage:(UIImage *)image {
    
-    NSData *imgData  = UIImageJPEGRepresentation(image, MAXQUALITY);
+    UIImage * thumImg = [image fixOrientation];
+    
+    __block NSData *imgData  = UIImageJPEGRepresentation(thumImg, 1);
+    NSUInteger sizeOrigin   = imgData.length;
+    NSUInteger sizeOriginKB = sizeOrigin / 1024;
+    if (sizeOriginKB <= SIZE) return imgData;
+    
 
+    CGFloat qualityCompress = MAXQUALITY;
     // 压缩图片如果超过限制大小，则循环递减
     // 返回以 JPEG 格式表示的图片的二进制数据 如没有最低系数，去掉&&后参数
-    while (imgData.length > SIZE*1024 && MAXQUALITY >= MINQUALITY) {
+    while (imgData.length / 1024 > SIZE && qualityCompress >= MINQUALITY) {
         @autoreleasepool {
-            MAXQUALITY -= 0.05;
-            imgData = UIImageJPEGRepresentation(image, MAXQUALITY);
-            NSLog(@"\n%ld\n%f", imgData.length,MAXQUALITY);
+            qualityCompress -= 0.05;
+            imgData = UIImageJPEGRepresentation(image, qualityCompress);
+            NSLog(@"循环压缩 ==%f kb 压缩系数为%.2f",imgData.length/1024.0,qualityCompress);
         }
     }
-
+    NSLog(@"压缩后 ==%f kb 压缩系数为%.2f",imgData.length/1024.0,qualityCompress);
     // 返回图片的二进制数据
     return  imgData;
 
@@ -60,7 +76,7 @@ static CGFloat  SIZE = 200; //图片限定大小，单位KB
     CGFloat height = self.size.height;
     
     // 宽高均<= 设定长度，图片尺寸大小保持不变
-    if (width < BOUNDARY && height < BOUNDARY) {
+    if (width <= BOUNDARY && height <= BOUNDARY) {
         return CGSizeMake(width, height);
     }
     
@@ -107,5 +123,84 @@ static CGFloat  SIZE = 200; //图片限定大小，单位KB
     UIImage * newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return newImage;
+}
+
+- (UIImage *)fixOrientation {
+    
+    // 判断图片方向是否正确，正确则返回
+    if (self.imageOrientation == UIImageOrientationUp) return self;
+    
+    // 计算适当的变换使图像垂直
+    // 两步:如果是左/右/向下旋转，如果是镜像则翻转
+    CGAffineTransform transform = CGAffineTransformIdentity;
+    
+    switch (self.imageOrientation) {
+        case UIImageOrientationDown:
+        case UIImageOrientationDownMirrored:
+            transform = CGAffineTransformTranslate(transform, self.size.width, self.size.height);
+            transform = CGAffineTransformRotate(transform, M_PI);
+            break;
+            
+        case UIImageOrientationLeft:
+        case UIImageOrientationLeftMirrored:
+            transform = CGAffineTransformTranslate(transform, self.size.width, 0);
+            transform = CGAffineTransformRotate(transform, M_PI_2);
+            break;
+            
+        case UIImageOrientationRight:
+        case UIImageOrientationRightMirrored:
+            transform = CGAffineTransformTranslate(transform, 0, self.size.height);
+            transform = CGAffineTransformRotate(transform, -M_PI_2);
+            break;
+        case UIImageOrientationUp:
+        case UIImageOrientationUpMirrored:
+            break;
+    }
+    
+    switch (self.imageOrientation) {
+        case UIImageOrientationUpMirrored:
+        case UIImageOrientationDownMirrored:
+            transform = CGAffineTransformTranslate(transform, self.size.width, 0);
+            transform = CGAffineTransformScale(transform, -1, 1);
+            break;
+            
+        case UIImageOrientationLeftMirrored:
+        case UIImageOrientationRightMirrored:
+            transform = CGAffineTransformTranslate(transform, self.size.height, 0);
+            transform = CGAffineTransformScale(transform, -1, 1);
+            break;
+        case UIImageOrientationUp:
+        case UIImageOrientationDown:
+        case UIImageOrientationLeft:
+        case UIImageOrientationRight:
+            break;
+    }
+    
+    // 将底层的CGImage绘制到一个新的Context中，并转换为正确方向
+    CGContextRef ctx = CGBitmapContextCreate(NULL, self.size.width, self.size.height,
+                                             CGImageGetBitsPerComponent(self.CGImage), 0,
+                                             CGImageGetColorSpace(self.CGImage),
+                                             CGImageGetBitmapInfo(self.CGImage));
+    CGContextConcatCTM(ctx, transform);
+    switch (self.imageOrientation) {
+        case UIImageOrientationLeft:
+        case UIImageOrientationLeftMirrored:
+        case UIImageOrientationRight:
+        case UIImageOrientationRightMirrored:
+            
+            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage);
+            break;
+            
+        default:
+            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.width,self.size.height), self.CGImage);
+            break;
+    }
+    
+    // 创建一个新的UIImage
+    CGImageRef cgimg = CGBitmapContextCreateImage(ctx);
+    UIImage *img = [UIImage imageWithCGImage:cgimg];
+    CGContextRelease(ctx);
+    CGImageRelease(cgimg);
+    return img;
 }
 @end

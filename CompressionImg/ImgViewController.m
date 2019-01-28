@@ -9,7 +9,6 @@
 #import "ImgViewController.h"
 #import "UIImage+Compression.h"
 #import "UIAlertCategory.h"
-
 @interface ImgViewController ()<UIAlertViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *imgBtn;
 @property (weak, nonatomic) IBOutlet UIImageView *originalImg;
@@ -57,13 +56,16 @@
 - (void)upData{
     [self.originalImg setImage:self.image];
     
-    self.originalSize.text = [NSString stringWithFormat:@"大小%@宽%.1f高%.1f", [self bytesToAvaiUnit:UIImageJPEGRepresentation(self.image, 1.0).length],self.image.size.width,self.image.size.height];
+    self.originalSize.text = [NSString stringWithFormat:@"大小%@ 宽%.1f 高%.1f", [self bytesToAvaiUnit:UIImageJPEGRepresentation(self.image, 1.0).length],self.image.size.width,self.image.size.height];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+
         UIImage * comImg = [self.image compressToImage];
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.compressionImg setImage:comImg];
-             self.compressionSize.text = [NSString stringWithFormat:@"大小%@宽%.1f高%.1f",[self bytesToAvaiUnit:UIImageJPEGRepresentation(comImg, 1.0).length],comImg.size.width,comImg.size.height];
+            
+             [self.compressionImg setImage:comImg];
+             self.compressionSize.text = [NSString stringWithFormat:@"大小%@ 宽%.1f高%.1f",[self bytesToAvaiUnit:[comImg returnCompressSize].length],comImg.size.width,comImg.size.height];
         });
     });
   
