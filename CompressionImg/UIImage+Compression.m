@@ -18,10 +18,12 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
 
 //返回 压缩后图片
 - (UIImage *)compressToImage {
+#ifdef DEBUG
     NSData *imageData = UIImageJPEGRepresentation(self, 1);
     NSLog(@"压缩前 ==%f kb",imageData.length/1024.0);
+#endif
     CGSize size = [self imageSize];
-    UIImage *reImage = [self toSourceImageWithSize:size];
+    UIImage *reImage = [self toSourceImageWithSize:MAX(size.width,size.height)];
     NSData * data = [self cycleCompressImage:reImage];
     UIImage * compressImg = [UIImage imageWithData:data];
     return compressImg;
@@ -29,7 +31,7 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
 //返回 压缩后大小
 - (NSData *)returnCompressSize{
     CGSize size = [self imageSize];
-    UIImage *reImage = [self toSourceImageWithSize:size];
+    UIImage *reImage = [self toSourceImageWithSize:MAX(size.width,size.height)];
     NSData * data = [self cycleCompressImage:reImage];
     return data;
 }
@@ -44,25 +46,37 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
     UIImage * thumImg = [image fixOrientation];
     
     __block NSData *imgData  = UIImageJPEGRepresentation(thumImg, 1);
-    NSUInteger sizeOrigin   = imgData.length;
-    NSUInteger sizeOriginKB = sizeOrigin / 1024;
-    if (sizeOriginKB <= SIZE) return imgData;
+    if (imgData.length / 1024 <= SIZE) return imgData;
     
-
-    CGFloat qualityCompress = MAXQUALITY;
-    // 压缩图片如果超过限制大小，则循环递减
-    // 返回以 JPEG 格式表示的图片的二进制数据 如没有最低系数，去掉&&后参数
-    while (imgData.length / 1024 > SIZE && qualityCompress >= MINQUALITY) {
-        @autoreleasepool {
-            qualityCompress -= 0.05;
+    CGFloat max = MAXQUALITY;
+    CGFloat min = MINQUALITY;
+    
+    //指数二分处理，首先计算最小值0.0625
+    CGFloat qualityCompress = pow(2, -4);
+    imgData = UIImageJPEGRepresentation(image, qualityCompress);
+    if (imgData.length / 1024 < SIZE) {
+        //二分最大4次，精度可达0.0625， 通过对比，4次基本满足条件
+        for (int i = 0; i < 4; ++i) {
+            qualityCompress = (max + min) / 2;
             imgData = UIImageJPEGRepresentation(image, qualityCompress);
-            NSLog(@"循环压缩 ==%f kb 压缩系数为%.2f",imgData.length/1024.0,qualityCompress);
+            //容错区间范围0.9～1.0
+            if (imgData.length < SIZE * 0.9) {
+                min = qualityCompress;
+            } else if (imgData.length > SIZE) {
+                max = qualityCompress;
+            } else {
+                break;
+            }
+#ifdef DEBUG
+             NSLog(@"循环压缩 ==%f kb 压缩系数为%.2f",imgData.length/1024.0,qualityCompress);
+#endif
         }
     }
+#ifdef DEBUG
     NSLog(@"压缩后 ==%f kb 压缩系数为%.2f",imgData.length/1024.0,qualityCompress);
-    // 返回图片的二进制数据
-    return  imgData;
-
+#endif
+    return imgData;
+    
 }
 
 /**
@@ -93,7 +107,7 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
             height = BOUNDARY;
             width = width / MaxEdgeRatio;
         }
-    } else {
+    }else {
         // 宽高均> 设定长度 && 宽高比> 2，取较小值等于设定长度，较大值等比例压缩
         if (MIN(width, height) >= BOUNDARY) {
             CGFloat MinEdgeRatio = MIN(width, height) / BOUNDARY;
@@ -110,21 +124,35 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
 }
 
 /**
- 根据图片Size返回对应图片
+ 根据图片Size返回对应图片，为降低CPU消耗使用Image I/O
  
  @return  图片
  */
-- (UIImage *)toSourceImageWithSize:(CGSize)imgSize {
+- (UIImage *)toSourceImageWithSize:(NSUInteger)imgSize {
+    NSData * data = UIImageJPEGRepresentation(self, 1);
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    CGImageSourceRef source = CGImageSourceCreateWithDataProvider(provider, NULL);
     
-    UIGraphicsBeginImageContextWithOptions(imgSize, YES, self.scale);
+    CGImageRef imageRef = CGImageSourceCreateThumbnailAtIndex(source, 0, (__bridge CFDictionaryRef) @{
+                                                                                                      (NSString *)kCGImageSourceCreateThumbnailFromImageAlways : @YES,
+                                                                                                      (NSString *)kCGImageSourceThumbnailMaxPixelSize : @(imgSize),
+                                                                                                      (NSString *)kCGImageSourceCreateThumbnailWithTransform : @YES,
+                                                                                                      });
+    CFRelease(source);
+    CFRelease(provider);
     
-    [self drawInRect:(CGRect){0, 0, imgSize}];
+    if (!imageRef) {
+        return nil;
+    }
     
-    UIImage * newImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return newImage;
+    UIImage *toReturn = [UIImage imageWithCGImage:imageRef];
+    
+    CFRelease(imageRef);
+    
+    return toReturn;
 }
 
+// 返回正常方向图片
 - (UIImage *)fixOrientation {
     
     // 判断图片方向是否正确，正确则返回
