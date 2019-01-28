@@ -17,3 +17,24 @@
 用新图片 使用二分法 进行压质量。
 
 博客：https://yimouleng.com/2019/01/24/%E5%9B%BE%E7%89%87%E5%8E%8B%E7%BC%A9/
+
+
+## Usage
+```objective-c
+#import "UIImage+Compression.h"
+```
+```objective-c
+UIImage * thumbImage = [self.image compressToImage];
+```
+
+
+
+## Effect comparison
+| original | this |
+| -------- | ---- |
+| 4016 * 3012,  15.19MB  | 1334 * 1001, 224KB |
+| 1125 * 2436,  2.6MB  | 1125 * 2436, 158KB |
+| 2880 * 1800,  5.91MB  | 1334 * 834, 154KB |
+| 1080 * 1920,  1.29MB  | 750 * 1334, 238KB |
+| 720 * 1280,  730KB  | 750 * 1334, 96KB |
+| 1280 * 1280,  2.06MB  | 1280 * 1280, 219KB |
