@@ -16,6 +16,7 @@
 		451C947721F97B9D00E46179 /* UIAlertCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 451C947221F97B9C00E46179 /* UIAlertCategory.m */; };
 		451C947D21F97D1C00E46179 /* ImgViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 451C947B21F97D1C00E46179 /* ImgViewController.m */; };
 		451C947E21F97D1C00E46179 /* ImgViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 451C947C21F97D1C00E46179 /* ImgViewController.xib */; };
+		EEF54548C27703DB158053C2 /* libPods-CompressionImg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6160CF8F6094045E86338DBE /* libPods-CompressionImg.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,9 @@
 		451C947A21F97D1C00E46179 /* ImgViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImgViewController.h; sourceTree = "<group>"; };
 		451C947B21F97D1C00E46179 /* ImgViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImgViewController.m; sourceTree = "<group>"; };
 		451C947C21F97D1C00E46179 /* ImgViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ImgViewController.xib; sourceTree = "<group>"; };
+		6160CF8F6094045E86338DBE /* libPods-CompressionImg.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CompressionImg.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7959345A4BB2A05D51B213A6 /* Pods-CompressionImg.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CompressionImg.debug.xcconfig"; path = "Target Support Files/Pods-CompressionImg/Pods-CompressionImg.debug.xcconfig"; sourceTree = "<group>"; };
+		E5B8FAE5A6F2BEA581F898BA /* Pods-CompressionImg.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CompressionImg.release.xcconfig"; path = "Target Support Files/Pods-CompressionImg/Pods-CompressionImg.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEF54548C27703DB158053C2 /* libPods-CompressionImg.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +94,8 @@
 				451C945521F97B3700E46179 /* CompressionImgTests */,
 				451C946021F97B3700E46179 /* CompressionImgUITests */,
 				451C943B21F97B3500E46179 /* Products */,
+				D222B496F48722EA7BAB0C63 /* Pods */,
+				C6B57CB9992D40F5124074FA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -139,6 +146,24 @@
 			path = CompressionImgUITests;
 			sourceTree = "<group>";
 		};
+		C6B57CB9992D40F5124074FA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6160CF8F6094045E86338DBE /* libPods-CompressionImg.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D222B496F48722EA7BAB0C63 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				7959345A4BB2A05D51B213A6 /* Pods-CompressionImg.debug.xcconfig */,
+				E5B8FAE5A6F2BEA581F898BA /* Pods-CompressionImg.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -146,6 +171,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 451C946621F97B3700E46179 /* Build configuration list for PBXNativeTarget "CompressionImg" */;
 			buildPhases = (
+				62BD048DCDC446D0CC522057 /* [CP] Check Pods Manifest.lock */,
 				451C943621F97B3500E46179 /* Sources */,
 				451C943721F97B3500E46179 /* Frameworks */,
 				451C943821F97B3500E46179 /* Resources */,
@@ -262,6 +288,31 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		62BD048DCDC446D0CC522057 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CompressionImg-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		451C943621F97B3500E46179 /* Sources */ = {
@@ -422,6 +473,7 @@
 		};
 		451C946721F97B3700E46179 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7959345A4BB2A05D51B213A6 /* Pods-CompressionImg.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -440,6 +492,7 @@
 		};
 		451C946821F97B3700E46179 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E5B8FAE5A6F2BEA581F898BA /* Pods-CompressionImg.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;

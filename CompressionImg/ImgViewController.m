@@ -9,12 +9,15 @@
 #import "ImgViewController.h"
 #import "UIImage+Compression.h"
 #import "UIAlertCategory.h"
+#import "KSPhotoBrowser.h"
+
 @interface ImgViewController ()<UIAlertViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *imgBtn;
 @property (weak, nonatomic) IBOutlet UIImageView *originalImg;
 @property (weak, nonatomic) IBOutlet UILabel *originalSize;
 @property (weak, nonatomic) IBOutlet UIImageView *compressionImg;
 @property (weak, nonatomic) IBOutlet UILabel *compressionSize;
+@property (weak, nonatomic) IBOutlet UIButton *reviewImg;
 @property (nonatomic,strong) UIImagePickerController *imagePicker;
 @property (nonatomic ,strong) UIImage * image;
 @end
@@ -24,6 +27,24 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.imgBtn addTarget:self action:@selector(clickImg) forControlEvents:UIControlEventTouchUpInside];
+    [self.reviewImg addTarget:self action:@selector(reviewImages) forControlEvents:UIControlEventTouchUpInside];
+  
+}
+
+
+- (void)reviewImages{
+    if(self.originalImg.image && self.compressionImg.image){
+        NSArray * imageViews = @[self.originalImg,self.compressionImg];
+        NSArray *names = @[self.originalImg.image, self.compressionImg.image];
+        NSMutableArray *items = @[].mutableCopy;
+        for (int i = 0; i < names.count; i++) {
+            UIImageView *imageView = imageViews[i];
+            KSPhotoItem *item = [KSPhotoItem itemWithSourceView:imageView image:names[i]];
+            [items addObject:item];
+        }
+        KSPhotoBrowser *browser = [KSPhotoBrowser browserWithPhotoItems:items selectedIndex:0];
+        [browser showFromViewController:self];
+    }
 }
 
 - (void)clickImg {
@@ -68,7 +89,7 @@
              self.compressionSize.text = [NSString stringWithFormat:@"大小%@ 宽%.1f高%.1f",[self bytesToAvaiUnit:[comImg returnCompressSize].length],comImg.size.width,comImg.size.height];
         });
     });
-  
+   
     
 }
 

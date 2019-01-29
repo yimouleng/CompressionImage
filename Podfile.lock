@@ -1,0 +1,31 @@
+PODS:
+  - FLAnimatedImage (1.0.12)
+  - KSPhotoBrowser (0.2.4):
+    - FLAnimatedImage (~> 1.0)
+    - SDWebImage (~> 4.0)
+    - SDWebImage/GIF
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
+  - SDWebImage/GIF (4.4.2):
+    - FLAnimatedImage (~> 1.0)
+    - SDWebImage/Core
+
+DEPENDENCIES:
+  - KSPhotoBrowser
+  - SDWebImage
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - FLAnimatedImage
+    - KSPhotoBrowser
+    - SDWebImage
+
+SPEC CHECKSUMS:
+  FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
+  KSPhotoBrowser: 1f60c68401f34bcc223838c8592269b4a10a83bf
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
+
+PODFILE CHECKSUM: b8a874f00ab121546fff61a1ab2b702cb6d90161
+
+COCOAPODS: 1.6.0.beta.1
