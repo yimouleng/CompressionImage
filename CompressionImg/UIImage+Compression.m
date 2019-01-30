@@ -10,7 +10,7 @@
 
 static CGFloat const BOUNDARY = 1334;  //图片限定长度值
 static CGFloat const MAXQUALITY = 0.8;  //初始最高压缩质量系数
-static CGFloat const MINQUALITY = 0.3;  //初始最低压缩质量系数
+static CGFloat const MINQUALITY = 0.4;  //初始最低压缩质量系数
 static CGFloat const SIZE = 300; //图片限定大小，单位KB
 
 @implementation UIImage (Compression)
@@ -53,16 +53,16 @@ static CGFloat const SIZE = 300; //图片限定大小，单位KB
     
     //指数二分处理，首先计算最小值0.0625
     CGFloat qualityCompress = pow(2, -4);
-    imgData = UIImageJPEGRepresentation(image, qualityCompress);
+    imgData = UIImageJPEGRepresentation(thumImg, qualityCompress);
     if (imgData.length / 1024 < SIZE) {
         //二分最大4次，精度可达0.0625， 通过对比，4次基本满足条件
         for (int i = 0; i < 4; ++i) {
             qualityCompress = (max + min) / 2;
-            imgData = UIImageJPEGRepresentation(image, qualityCompress);
-            //容错区间范围0.9～1.0
-            if (imgData.length < SIZE * 0.9) {
+            imgData = UIImageJPEGRepresentation(thumImg, qualityCompress);
+            //容错区间范围0.9～1.0，当图片大小小于 SIZE，大于 SIZE * 0.9 时，不再继续压缩
+            if (imgData.length / 1024 < SIZE * 0.9) {
                 min = qualityCompress;
-            } else if (imgData.length > SIZE) {
+            } else if (imgData.length / 1024 > SIZE) {
                 max = qualityCompress;
             } else {
                 break;
